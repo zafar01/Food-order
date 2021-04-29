@@ -130,10 +130,10 @@ class FoodController extends Controller
 		 $arr = DB::table('food')
 	     ->where('food.id','=',$id)
 		//->select('categories.title as cat_name',"food.*") 
-		->select("food.id","food.title","food.details","food.amount",\DB::raw("GROUP_CONCAT(categories.title) as Category"))
+		->select("food.id","food.product_code","food.title","food.details","food.amount",\DB::raw("GROUP_CONCAT(categories.title) as Category"))
 		
 		->leftJoin("categories",\DB::raw("FIND_IN_SET(categories.id,food.category_id)"),">",\DB::raw("'0'"))
-		->GroupBy("food.id","food.title","food.details","food.amount"  )->get(); 
+		->GroupBy("food.id","food.title","food.details","food.amount" ,"food.product_code" )->get(); 
 	  }
 		
        
