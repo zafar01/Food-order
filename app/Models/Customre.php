@@ -17,7 +17,7 @@ class Customre extends Authenticatable
         protected $guard = 'customre';
 
         protected $fillable = [
-            'name', 'email', 'password',
+            'name', 'email', 'password','phone'
         ];
 
         protected $hidden = [

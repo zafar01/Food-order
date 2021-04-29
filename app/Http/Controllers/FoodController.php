@@ -61,7 +61,7 @@ class FoodController extends Controller
 		 
 		
         if ($validator->fails()) {
-            $arr = array("status" => 400, "message1" => $validator->errors()->first(), "data" => array());
+            $arr = array("status" => 400, "message" => $validator->errors()->first(), "data" => array());
         
 		} else {
 			
@@ -121,15 +121,24 @@ class FoodController extends Controller
      */
     public function show($id)
     {
-       $food = DB::table('food')
+		$check = Food::where('id', '=', $id)->first();
+       if ($check === null) {
+        $arr = array("status" => 400, "message" => "Not Found Data", "data" => array());
+      
+	  }else{
+		  
+		 $arr = DB::table('food')
 	     ->where('food.id','=',$id)
 		//->select('categories.title as cat_name',"food.*") 
-		->select("food.id","food.title","food.details","food.amount",\DB::raw("GROUP_CONCAT(categories.title) as book_name"))
+		->select("food.id","food.title","food.details","food.amount",\DB::raw("GROUP_CONCAT(categories.title) as Category"))
 		
 		->leftJoin("categories",\DB::raw("FIND_IN_SET(categories.id,food.category_id)"),">",\DB::raw("'0'"))
-		->GroupBy("food.id","food.title","food.details","food.amount"  )->get();
+		->GroupBy("food.id","food.title","food.details","food.amount"  )->get(); 
+	  }
 		
-		return $food;
+       
+		
+		return \Response::json($arr);
     }
 
     /**
@@ -152,19 +161,7 @@ class FoodController extends Controller
      */
     public function update(Request $request, $id)
     {
-         /*  $food = Food::findorFail($id);
-		$food->title = $request->title;
-		$food->details = $request->details;
-		$food->amount = $request->amount;
-		if($food->save()){
-			return new FoodResource($food);
-		}
-		 */
-		
-		
-	
-		 
-		
+         
 		     $filename = null;
 	         $input = $request->all(); 
 			 
@@ -174,7 +171,7 @@ class FoodController extends Controller
              'title' => 'required',
              'amount'=> 'required',
 			 'category'=> 'required',
-             'product_code'=> 'required|max:6|unique:food,id,'.$id,			 
+             'product_code'=> 'required|max:6|unique:food,product_code,'.$id,			 
         );
         $validator = Validator::make($input, $rules);
 		 
@@ -234,10 +231,20 @@ class FoodController extends Controller
      */
     public function destroy($id)
     {
-        $food = Food::findorFail($id);
+		$check = Food::where('id', '=', $id)->first();
+       if ($check === null) {
+        $arr = array("status" => 400, "message" => "Not Found Data", "data" => array());
+      }else{
+		 $food = Food::findorFail($id);
 	    if($food->delete())
 		{
-			return new FoodResource($food);
-		}
+			$arr = array("status" => 400, "message" => "Successfully Deleted", "data" => array());
+		} 
+	  }
+		  
+       return \Response::json($arr); 
     }
+	
+	
+	
 }

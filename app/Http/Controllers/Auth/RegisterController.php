@@ -131,6 +131,7 @@ class RegisterController extends Controller
 			 $arr = Customre::create([
             'name' => $request['name'],
             'email' => $request['email'],
+			'phone'=>$request['phone'],
             'password' => Hash::make($request['password']),
         ]);
 		}

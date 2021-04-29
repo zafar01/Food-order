@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Http\Resources\CategoryResources;
+use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
@@ -37,12 +38,47 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $cat = new Category();
+        
+		
+		
+		$input = $request->all();
+			 $rules = array(
+             'title' => 'required|unique:categories',
+             'status'=> 'required' 			 		 
+        );
+        $validator = Validator::make($input, $rules);
+		 
+		
+        if ($validator->fails()) {
+			
+			$arr = array("status" => 400, "message" => $validator->errors()->first(), "data" => array());
+		}else{
+			
+			try {
+			$cat = new Category();
 		$cat->title = $request->title;
 		$cat->status = $request->status;
 		if($cat->save()){
-			return new CategoryResources($cat);
+			$arr = new CategoryResources($cat);
 		}
+		
+			}catch (\Exception $ex) {
+                if (isset($ex->errorInfo[2])) {
+                    $msg = $ex->errorInfo[2];
+                } else {
+                    $msg = $ex->getMessage();
+                }
+                $arr = array("status" => 400, "message" => $msg, "data" => array());
+            }
+			
+			
+			
+		}
+		
+		
+		
+		 return \Response::json($arr);
+		
     }
 
     /**
@@ -53,8 +89,19 @@ class CategoryController extends Controller
      */
     public function show($id)
     {
-        $cat =  Category::findorFail($id);
-		return new CategoryResources($cat);
+		$cate = Category::where('id', '=', $id)->first();
+       if ($cate === null) {
+        $arr = array("status" => 400, "message" => "Not Found Data", "data" => array());
+      }else{
+	    $cat =  Category::findorFail($id);
+		  
+		if($cat){
+		$arr = new CategoryResources($cat);
+		}
+        }
+           
+		
+		 return \Response::json($arr);
     }
 
     /**
@@ -77,12 +124,48 @@ class CategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $cat =   Category::findorFail($id);
+        
+		
+		
+		$input = $request->all();
+			 $rules = array(
+             'status'=> 'required' ,
+            'title' => 'required|unique:categories,title,'.$id			 
+        );
+        $validator = Validator::make($input, $rules);
+		 
+		
+        if ($validator->fails()) {
+			
+			$arr = array("status" => 400, "message" => $validator->errors()->first(), "data" => array());
+		}else{
+			
+			try {
+			$cat =   Category::findorFail($id);
 		$cat->title = $request->title;
 		$cat->status = $request->status;
 		if($cat->save()){
-			return new CategoryResources($cat);
+			$arr = new CategoryResources($cat);
 		}
+		
+			}catch (\Exception $ex) {
+                if (isset($ex->errorInfo[2])) {
+                    $msg = $ex->errorInfo[2];
+                } else {
+                    $msg = $ex->getMessage();
+                }
+                $arr = array("status" => 400, "message" => $msg, "data" => array());
+            }
+			
+			
+			
+		}
+		
+		
+		
+		 return \Response::json($arr);
+		 
+		 
     }
 
     /**
@@ -93,9 +176,21 @@ class CategoryController extends Controller
      */
     public function destroy($id)
     {
-        $cat = Category::findorFail($id);
+		$cate = Category::where('id', '=', $id)->first();
+       if ($cate === null) {
+        $arr = array("status" => 400, "message" => "Not Found Data", "data" => array());
+      }else{
+		$cat = Category::findorFail($id);
 		if($cat->delete()){
-			return new CategoryResources($cat);
-		}
+			 $arr = array("status" => 400, "message" => "Successfully Deleted", "data" => array());
+		}  
+	  }
+       return \Response::json($arr); 
     }
+	
+	
+	
+	
+	
+	
 }

@@ -34,6 +34,8 @@ class AdminController extends Controller
 	
 	
 	function customre(){
+		
+		
 		 return $customer = DB::table('customres')->paginate(10);
 		
 	}
